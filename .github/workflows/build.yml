@@ -23,6 +23,9 @@ jobs:
         with:
           gradle-version: "8.7"
 
+      - name: Restore signing key
+        run: base64 -d app/personal.keystore.b64 > app/personal.keystore
+
       - name: Build release APK
         run: gradle :app:assembleRelease --no-daemon --stacktrace
 
