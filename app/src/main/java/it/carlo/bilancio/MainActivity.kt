@@ -146,7 +146,7 @@ private fun Screen() {
         Card("Peso (kg)") { WeightChart(window) }
         Card("Dettaglio per giorno") { DayTable(window.reversed()) }
         Text(
-            "Bruciate = riposo (Garmin) + attività Withings, che comprende già le corse importate dal Fenix (senza dati Withings si usa la corsa del Fenix). Stime dei dispositivi: la verifica vera è la media settimanale del peso.",
+            "Bruciate = riposo + attività Garmin dell'intera giornata (CIRQA fuori dalla corsa, Fenix in corsa) dal 21/11; prima, riposo + attività Withings. Stime dei dispositivi: la verifica vera è la media settimanale del peso.",
             color = MUTED, fontSize = 11.sp,
         )
     }
@@ -192,7 +192,7 @@ private fun TodayCards(d: DayBalance?) {
     }
     if (d != null) {
         Text(
-            "Riposo ${fmt(d.resting)} · Attività Withings ${if (d.scanwatch == null) "n.d." else fmt(d.scanwatch)} (corsa Fenix ${fmt(d.run)} inclusa) · Proteine ${fmt(d.protein)} g",
+            "Riposo ${fmt(d.resting)} · Attività Garmin (CIRQA + Fenix) ${fmt(d.run)} · Proteine ${fmt(d.protein)} g",
             color = MUTED, fontSize = 12.sp,
         )
     }

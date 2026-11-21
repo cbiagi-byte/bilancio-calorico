@@ -19,8 +19,14 @@ data class DayBalance(
     val partial: Boolean,
     val weight: Double?,
 ) {
-    /** Withings active kcal already include the runs it imports from the Fenix; the Fenix run is the fallback. */
-    val burned: Int? get() = resting?.let { it + (scanwatch ?: run ?: 0) }
+    /**
+     * From 2026-11-21 Carlo wears the Garmin CIRQA band outside runs, so Garmin's daily active kcal
+     * (here `run`) cover the whole day. Before that, Withings active kcal (which include the runs it
+     * imports from the Fenix) were the day's activity, with the Fenix as fallback.
+     */
+    val burned: Int? get() = resting?.let {
+        if (date >= GARMIN_ONLY_FROM) it + (run ?: 0) else it + (scanwatch ?: run ?: 0)
+    }
     val diff: Int? get() = if (intake != null && burned != null) intake - burned!! else null
     val remaining: Int? get() = if (intake != null && target != null) target - intake else null
 
@@ -31,6 +37,7 @@ data class DayBalance(
         .put("partial", partial).put("weight", weight ?: JSONObject.NULL)
 
     companion object {
+        const val GARMIN_ONLY_FROM = "2026-11-21"
         private fun JSONObject.intOrNull(k: String): Int? = if (isNull(k) || !has(k)) null else optInt(k)
         private fun JSONObject.dblOrNull(k: String): Double? = if (isNull(k) || !has(k)) null else optDouble(k)
         fun fromJson(o: JSONObject) = DayBalance(
