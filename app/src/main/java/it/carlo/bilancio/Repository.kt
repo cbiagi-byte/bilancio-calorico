@@ -19,7 +19,8 @@ data class DayBalance(
     val partial: Boolean,
     val weight: Double?,
 ) {
-    val burned: Int? get() = resting?.let { it + (run ?: 0) + (scanwatch ?: 0) }
+    /** Withings active kcal already include the runs it imports from the Fenix; the Fenix run is the fallback. */
+    val burned: Int? get() = resting?.let { it + (scanwatch ?: run ?: 0) }
     val diff: Int? get() = if (intake != null && burned != null) intake - burned!! else null
     val remaining: Int? get() = if (intake != null && target != null) target - intake else null
 
@@ -193,9 +194,12 @@ class Repository(private val context: Context) {
         for (i in 0 until arr.length()) {
             val a = arr.getJSONObject(i)
             val d = (a.optString("date").ifBlank { a.optString("day") }).take(10)
-            val kcal = a.numOrNull("calories") ?: a.numOrNull("active_calories")
-                ?: a.numOrNull("activeCalories") ?: a.numOrNull("activeKcal")
-            if (d.length == 10 && kcal != null) out[d] = kcal.roundToInt()
+            val kcal = a.numOrNull("active_calories") ?: a.numOrNull("activeCalories")
+                ?: a.numOrNull("calories") ?: a.numOrNull("activeKcal")
+            val total = a.numOrNull("total_calories") ?: 0.0
+            // Skip obviously broken days (active > 3000 and not below the day's total).
+            val broken = kcal != null && kcal > 3000 && total > 0 && kcal >= total
+            if (d.length == 10 && kcal != null && !broken) out[d] = kcal.roundToInt()
         }
         return out
     }
