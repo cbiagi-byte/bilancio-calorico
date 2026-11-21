@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bilancio calorico</string>
+    <string name="widget_name">Bilancio di oggi</string>
+    <string name="widget_description">Calorie assunte, bruciate e differenza di oggi</string>
+</resources>

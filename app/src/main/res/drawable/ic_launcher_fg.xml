@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Two bars (in / out) inside the adaptive-icon safe zone -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FF4FC3F7"
+        android:pathData="M38,44h12v32h-12z" />
+    <path
+        android:fillColor="#FFF5A623"
+        android:pathData="M58,34h12v42h-12z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M34,78h40v3h-40z" />
+</vector>
