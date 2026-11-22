@@ -166,22 +166,30 @@ class Repository(private val context: Context) {
         var winEnd = end
         while (!winEnd.isBefore(start)) {
             val winStart = maxOf(start, winEnd.minusDays(27))
-            val args = JSONObject()
-                .put("start_date", winStart.toString())
-                .put("end_date", winEnd.toString())
-                .put("timezone", "Europe/San_Marino")
-                .put("limit", 1)
-            val res = c.callTool("food_log_get", args)
-            val totals = res.optJSONArray("daily_totals") ?: JSONArray()
-            for (i in 0 until totals.length()) {
-                val t = totals.getJSONObject(i)
-                val d = t.optString("date").take(10)
-                if (d < winStart.toString() || d > winEnd.toString()) continue
-                out[d] = Pair(
-                    t.numOrNull("calories")?.roundToInt() ?: 0,
-                    t.numOrNull("protein")?.roundToInt() ?: 0,
-                )
-            }
+            // daily_totals only cover the days of the returned page: follow next_cursor.
+            var cursor: String? = null
+            var pages = 0
+            do {
+                val args = JSONObject()
+                    .put("start_date", winStart.toString())
+                    .put("end_date", winEnd.toString())
+                    .put("timezone", "Europe/San_Marino")
+                    .put("limit", 200)
+                cursor?.let { args.put("cursor", it) }
+                val res = c.callTool("food_log_get", args)
+                val totals = res.optJSONArray("daily_totals") ?: JSONArray()
+                for (i in 0 until totals.length()) {
+                    val t = totals.getJSONObject(i)
+                    val d = t.optString("date").take(10)
+                    if (d < winStart.toString() || d > winEnd.toString()) continue
+                    out[d] = Pair(
+                        t.numOrNull("calories")?.roundToInt() ?: 0,
+                        t.numOrNull("protein")?.roundToInt() ?: 0,
+                    )
+                }
+                cursor = res.optString("next_cursor").takeIf { it.isNotBlank() && it != "null" }
+                pages++
+            } while (cursor != null && pages < 15)
             winEnd = winStart.minusDays(1)
         }
         return out
